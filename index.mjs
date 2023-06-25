@@ -51,7 +51,7 @@ export function parse(html) {
         children  : /** @type {ASTElement[]}     */ [],
     };
 
-    // Eat whitespace and comments
+    // Eat space or blank, and comments
     let pos = eatWhiteSpace(html, 0)
     if (isComment(html, pos)) {
         pos = eatComment(html, pos);
@@ -81,14 +81,13 @@ export function parse(html) {
  */
 function parseElements(str, pos, children) {
     while (pos < str.length) {
-        // Eat whitespace and comments
+        // Eat space or blank, and comments
         pos = eatWhiteSpace(str, pos);
         if (isComment(str, pos)) {
             pos = eatComment(str, pos);
         }
 
-        // Parse a text node
-        // Continue if a text node was parsed
+        // Parse a text node and continue if a text node was parsed
         const posBeforeTextNode = pos;
         pos = parseTextNode(str, pos, children);
         if (pos > posBeforeTextNode) {
@@ -252,7 +251,7 @@ function parseTextNode(str, pos, children) {
 
     text = text.trim()
 
-    // Create and push a text node if it is not all whitespace
+    // Create and push a text node if it is not all space or blank
     if (text !== "") {
         children.push({
             tagName: "#text",
@@ -264,12 +263,12 @@ function parseTextNode(str, pos, children) {
 }
 
 /**
- * Eat white spaces from a given position in a string.
- * Returns the position after the white spaces.
+ * Eat space or blank from a given position in a string.
+ * Returns the position after the spaces or blanks.
  *
  * @param {string} str - The string to eat from
  * @param {number} pos - The position to start eating from
- * @returns {number} The position after the white spaces
+ * @returns {number} The position after the space or blank
  */
 function eatWhiteSpace(str, pos) {
     const spaces = [" ", "\r", "\n", "\t"];
@@ -350,7 +349,7 @@ function getTagName(str, pos) {
 /**
  * Check if there is a start HTML tag at a given position in a string.
  * It throws an error if the tag is not valid.
- * If true, returns the tag name and the position after the tag name.
+ * If true, return the tag name and the position after the tag name.
  *
  * @param {string} str - The string to check
  * @param {number} pos - The position to check
