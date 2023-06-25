@@ -1,5 +1,5 @@
 {
-  "name": "html-ast",
+  "name": "@popovmp/html-ast",
   "version": "1.0.0",
   "description": "Parses a standard HTML string into an AST",
   "type": "module",
