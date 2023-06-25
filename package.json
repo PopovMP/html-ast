@@ -1,7 +1,14 @@
 {
   "name": "html-ast",
   "version": "1.0.0",
+  "description": "Parses a standard HTML string into an AST",
   "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:PopovMP/html-ast.git"
+  },
   "scripts": {
     "test": "node --test"
   }
