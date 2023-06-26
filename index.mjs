@@ -13,7 +13,7 @@
  * @type {string[]}
  */
 const htmlTags = [
-    "!DOCTYPE", "a", "abbr", "acronym", "address", "applet", "area", "article", "aside", "audio", "b", "base",
+    "!doctype", "a", "abbr", "acronym", "address", "applet", "area", "article", "aside", "audio", "b", "base",
     "basefont", "bdi", "bdo", "bgsound", "big", "blink", "blockquote", "body", "br", "button", "canvas", "caption",
     "center", "cite", "code", "col", "colgroup", "content", "data", "datalist", "dd", "decorator", "del", "details",
     "dfn", "dir", "div", "dl", "dt", "element", "em", "embed", "fieldset", "figcaption", "figure", "font", "footer",
@@ -31,7 +31,7 @@ const htmlTags = [
  * @type {string[]}
  */
 const voidHtmlTags = [
-    "!DOCTYPE", "area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta",
+    "!doctype", "area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta",
     "param", "source", "track", "wbr",
 ];
 
@@ -129,7 +129,7 @@ function parseElement(str, pos) {
 
     pos = eatWhiteSpace(str, pos);
 
-    if (!voidHtmlTags.includes(tagName)) {
+    if (!voidHtmlTags.includes(tagName.toLowerCase())) {
         const [endTagName, endTagPos] = isEndTag(str, pos);
         pos = endTagPos;
         if (endTagName !== tagName) {
@@ -350,7 +350,7 @@ function isStartTag(str, pos) {
     const [tagName, newPos] = getTagName(str, pos+1);
     pos = newPos;
 
-    if (tagName === "" || !htmlTags.includes(tagName)) {
+    if (tagName === "" || !htmlTags.includes(tagName.toLowerCase())) {
         throw new Error("Invalid HTML tag: " + tagName);
     }
 
@@ -372,7 +372,7 @@ function isEndTag(str, pos) {
     }
 
     const [tagName, newPos] = getTagName(str, pos + 2);
-    if (tagName === "" || !htmlTags.includes(tagName)) {
+    if (tagName === "" || !htmlTags.includes(tagName.toLowerCase())) {
         throw new Error(`Invalid HTML tag${tagName}`);
     }
 
