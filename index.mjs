@@ -407,3 +407,111 @@ function getTagName(str, pos) {
 
     return [tagName, pos];
 }
+
+/**
+ * Get the attributes of an AST element.
+ *
+ * @param {ASTElement} elem
+ * @return {string[]} The attribute names
+ */
+export function getAttributeNames(elem) {
+    return Object.keys(elem.attributes);
+}
+
+/**
+ * Get the attribute's value of an AST element.
+ * @param {ASTElement} elem
+ * @param {string} attrName
+ */
+export function getAttribute(elem, attrName) {
+    return elem.attributes[attrName];
+}
+
+/**
+ * Gets the id of an AST element.
+ *
+ * @param {ASTElement} elem
+ * @return {string}
+ */
+export function getId(elem) {
+    return elem.attributes["id"] || "";
+}
+
+/**
+ * Gets a class name of an AST element.
+ *
+ * @param {ASTElement} elem
+ * @return {string}
+ */
+export function getClassName(elem) {
+    return elem.attributes["class"] || "";
+}
+
+/**
+ * Get the class names of an AST element.
+ *
+ * @param {ASTElement} elem
+ * @return {string[]} The class names array
+ */
+export function getClassList(elem) {
+    return getClassName(elem).split(" ").filter(name => name !== "");
+}
+
+/**
+ * Gets an AST element by its id recursively.
+ * Returns null if not found.
+ *
+ * @param {ASTElement} elem
+ * @param {string} id
+ * @return {ASTElement|null}
+ */
+export function getElementById(elem, id) {
+    if (getId(elem) === id) {
+        return elem;
+    }
+
+    for (let child of elem.children) {
+        const found = getElementById(child, id);
+        if (found) {
+            return found;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Gets children elements of an AST element by a tag name recursively.
+ *
+ * @param {ASTElement} elem
+ * @param {string} tagName
+ * @return {ASTElement[]}
+ */
+export function getElementsByTagName(elem, tagName) {
+    let children = [];
+
+    for (let child of elem.children) {
+        if (child.tagName === tagName) {
+            children.push(child);
+        }
+        children = children.concat(getElementsByTagName(child, tagName));
+    }
+
+    return children;
+}
+
+/**
+ * Gets children elements of an AST element by a class name recursively.
+ */
+export function getElementsByClassName(elem, className) {
+    let children = [];
+
+    for (let child of elem.children) {
+        if (getClassList(child).includes(className)) {
+            children.push(child);
+        }
+        children = children.concat(getElementsByClassName(child, className));
+    }
+
+    return children;
+}

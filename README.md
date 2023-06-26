@@ -22,7 +22,7 @@ const html = `
 const ast = parse(html);
 ```
 
-When the above code HTML string is parsed to a DOM object, the result is:
+When the HTML string is parsed to a DOM object, the result is:
 ```json
 {
   "tagName": "document",
@@ -91,3 +91,7 @@ When the above code HTML string is parsed to a DOM object, the result is:
   ]
 }
 ```
+
+Element properties: "getAttributeNames", "getAttribute", "getId", "getClassName", "getClassList".
+
+Query methods: "getElementById", "getElementsByClassName", "getElementsByTagName".
