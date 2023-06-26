@@ -193,7 +193,8 @@ function parseAttribute(str, pos) {
 function parseAttributeName(str, pos) {
     let name = "";
 
-    while (str[pos] !== "=" && str[pos] !== ">") {
+    // Attribute name finishes before "=" or ">" or " "
+    while (str[pos] !== "=" && str[pos] !== ">" && str[pos] !== " ") {
         name += str[pos];
         pos  += 1;
     }
@@ -323,8 +324,10 @@ function eatCommentIfAny(str, pos) {
         return pos;
     }
 
+    // Eat opening "<!--"
     pos += 4;
 
+    // Eat the comment content until closing "-->"
     while (str.slice(pos, pos + 3) !== "-->" && pos < str.length) {
         pos += 1;
     }
@@ -343,6 +346,7 @@ function eatCommentIfAny(str, pos) {
  * @returns {[string, number]} Gets the tag name and the position after the tag name
  */
 function isStartTag(str, pos) {
+    // Start tag must start with "<" and not continue with "/", "!", or "?"
     if (str[pos] !== "<" || str[pos + 1] === "/" || str[pos + 1] === "!" || str[pos + 1] === "?") {
         return ["", pos];
     }
@@ -351,7 +355,7 @@ function isStartTag(str, pos) {
     pos = newPos;
 
     if (tagName === "" || !htmlTags.includes(tagName.toLowerCase())) {
-        throw new Error("Invalid HTML tag: " + tagName);
+        throw new Error(`Invalid HTML tag: "${tagName}"`);
     }
 
     return [tagName, pos];
@@ -367,13 +371,14 @@ function isStartTag(str, pos) {
  * @returns {[string, number]} Returns the tag name and the position after the closing ">"
  */
 function isEndTag(str, pos) {
+    // End tag must start with "</"
     if (str[pos] !== "<" || str[pos + 1] !== "/") {
         return ["", pos];
     }
 
     const [tagName, newPos] = getTagName(str, pos + 2);
     if (tagName === "" || !htmlTags.includes(tagName.toLowerCase())) {
-        throw new Error(`Invalid HTML tag${tagName}`);
+        throw new Error(`Invalid HTML tag: "${tagName}"`);
     }
 
     // Eat closing ">"
