@@ -41,6 +41,8 @@ const voidHtmlTags = [
  * @param {string} html - The HTML string to parse
  */
 export function parse(html) {
+    let pos;
+
     /**
      * The root of the AST
      * @type {ASTElement}
@@ -51,11 +53,8 @@ export function parse(html) {
         children  : /** @type {ASTElement[]}     */ [],
     };
 
-    // Eat space or blank, and comments
-    let pos = eatWhiteSpace(html, 0)
-    if (isComment(html, pos)) {
-        pos = eatComment(html, pos);
-    }
+    pos = eatWhiteSpace(html, 0)
+    pos = eatCommentIfAny(html, pos);
 
     // Eat DOCTYPE
     const [tagName, doctypePos] = getTagName(html, pos+1);
@@ -81,11 +80,8 @@ export function parse(html) {
  */
 function parseElements(str, pos, children) {
     while (pos < str.length) {
-        // Eat space or blank, and comments
         pos = eatWhiteSpace(str, pos);
-        if (isComment(str, pos)) {
-            pos = eatComment(str, pos);
-        }
+        pos = eatCommentIfAny(str, pos);
 
         // Parse a text node and continue if a text node was parsed
         const posBeforeTextNode = pos;
@@ -314,29 +310,22 @@ function eatTag(str, pos) {
 }
 
 /**
- * Check if there is an HTML comment at a given position in a string.
- *
- * @param {string} str - The string to check
- * @param {number} pos - The position to check
- * @returns {boolean} Whether there is an HTML comment at the given position
- */
-function isComment(str, pos) {
-    return str[pos] === "<" && str[pos + 1] === "!" && str[pos + 2] === "-" && str[pos + 3] === "-";
-}
-
-/**
- * Eat an HTML comment from a given position in a string.
+ * Eat an HTML comment from a given position in a string if any.
  * Returns the position after the HTML comment.
  *
  * @param {string} str - The string to eat from
  * @param {number} pos - The position to start eating from
- * @returns {number} The position after the HTML comment
+ * @returns {number} The position after the HTML comment's closing "-->"
  */
-function eatComment(str, pos) {
-    // Eat opening "<!--"
+function eatCommentIfAny(str, pos) {
+    // Check for opening "<!--"
+    if (str.slice(pos, pos + 4) !== "<!--") {
+        return pos;
+    }
+
     pos += 4;
 
-    while (str[pos] !== "-" || str[pos + 1] !== "-" || str[pos + 2] !== ">") {
+    while (str.slice(pos, pos + 3) !== "-->" && pos < str.length) {
         pos += 1;
     }
 
