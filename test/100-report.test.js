@@ -5,7 +5,7 @@ import {readFileSync}  from "node:fs";
 import {describe, it} from "node:test";
 import {equal}        from "node:assert";
 
-import {parse} from "../index.mjs";
+import {parse} from "../index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = dirname(__filename);

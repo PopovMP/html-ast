@@ -1,4 +1,4 @@
-import {parse} from "../index.mjs";
+import {parse} from "../index.js";
 
 import {describe, it} from "node:test";
 import {equal} from "node:assert";

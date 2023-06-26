@@ -1,4 +1,4 @@
-import {parse, getAttributeNames, getAttribute} from "../index.mjs";
+import {parse, getAttributeNames, getAttribute} from "../index.js";
 
 import {describe, it} from "node:test";
 import {equal} from "node:assert";

@@ -1,4 +1,4 @@
-import {parse, getElementsByClassName} from "../index.mjs";
+import {parse, getElementsByClassName} from "../index.js";
 
 import {describe, it} from "node:test";
 import {equal} from "node:assert";
