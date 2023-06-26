@@ -216,22 +216,34 @@ function parseAttributeName(str, pos) {
 function parseAttributeValue(str, pos) {
     let value = "";
 
+    // Check if the attribute has a value
+    if (str[pos] !== "=") {
+        return [value, pos];
+    }
+
     // Eat "="
     pos += 1;
 
     pos = eatWhiteSpace(str, pos);
 
-    // Eat opening quote
-    pos += 1;
+    if (str[pos] === '"') {
+        // Eat opening quote
+        pos += 1;
 
-    while (str[pos] !== '"' && str[pos] !== ">"){
-        if (pos > str.length) debugger;
-        value += str[pos];
-        pos   += 1;
+        while (str[pos] !== '"' && str[pos] !== ">") {
+            if (pos > str.length) debugger;
+            value += str[pos];
+            pos += 1;
+        }
+
+        // Eat closing quote
+        pos += 1;
+    } else {
+        while (str[pos] !== " " && str[pos] !== ">") {
+            value += str[pos];
+            pos  += 1;
+        }
     }
-
-    // Eat closing quote
-    pos += 1;
 
     return [value, pos];
 }
