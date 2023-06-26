@@ -470,10 +470,12 @@ export function getElementById(elem, id) {
         return elem;
     }
 
-    for (let child of elem.children) {
-        const found = getElementById(child, id);
-        if (found) {
-            return found;
+    if (Array.isArray(elem.children)) {
+        for (let child of elem.children) {
+            const found = getElementById(child, id);
+            if (found) {
+                return found;
+            }
         }
     }
 
@@ -490,11 +492,13 @@ export function getElementById(elem, id) {
 export function getElementsByTagName(elem, tagName) {
     let children = [];
 
-    for (let child of elem.children) {
-        if (child.tagName === tagName) {
-            children.push(child);
+    if (Array.isArray(elem.children)) {
+        for (let child of elem.children) {
+            if (child.tagName === tagName) {
+                children.push(child);
+            }
+            children = children.concat(getElementsByTagName(child, tagName));
         }
-        children = children.concat(getElementsByTagName(child, tagName));
     }
 
     return children;
@@ -506,11 +510,13 @@ export function getElementsByTagName(elem, tagName) {
 export function getElementsByClassName(elem, className) {
     let children = [];
 
-    for (let child of elem.children) {
-        if (getClassList(child).includes(className)) {
-            children.push(child);
+    if (Array.isArray(elem.children)) {
+        for (let child of elem.children) {
+            if (getClassList(child).includes(className)) {
+                children.push(child);
+            }
+            children = children.concat(getElementsByClassName(child, className));
         }
-        children = children.concat(getElementsByClassName(child, className));
     }
 
     return children;
