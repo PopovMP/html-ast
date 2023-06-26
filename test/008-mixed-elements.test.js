@@ -7,7 +7,7 @@ describe("008-mixed-elements", () => {
     it('Parse mixed elements', () => {
         const html = `
                 <!DOCTYPE html>
-                <html>
+                <html lang="en">
                   <body>
                     <p>some text <b>bold text</b> <!-- comment --> other text <i> italic text </i></p>
                   </body>

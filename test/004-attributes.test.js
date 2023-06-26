@@ -12,9 +12,9 @@ describe("attributes", () => {
     });
 
     it('Parse two attributes', () => {
-        const html = '<!DOCTYPE html><html lang="English" source="Best Backend"></html>';
+        const html = '<!DOCTYPE html><html lang="English" class="wrapper main-page"></html>';
         const ast = parse(html);
         const attributes = ast.children[0].attributes;
-        equal(attributes["source"], "Best Backend");
+        equal(attributes["class"], "wrapper main-page");
     });
 });

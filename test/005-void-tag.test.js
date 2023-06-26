@@ -6,9 +6,10 @@ import {equal} from "node:assert";
 describe("void tag", () => {
     it('Parse a void tag', () => {
         const html = `<!DOCTYPE html>
-                        <html>
+                        <html lang="en">
                           <head>
                             <meta name="generator" content="client terminal">
+                            <title></title>
                           </head>
                         </html>
         `;

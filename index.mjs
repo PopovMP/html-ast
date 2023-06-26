@@ -131,8 +131,14 @@ function parseElement(str, pos) {
     pos = parseAttributes(str, pos, element.attributes);
     pos = parseElements(str, pos, element.children);
 
-    if (!voidHtmlTags.includes(tagName) && isEndTag(str, pos)) {
-        pos = eatEndTag(str, pos);
+    pos = eatWhiteSpace(str, pos);
+
+    if (!voidHtmlTags.includes(tagName)) {
+        const [endTagName, endTagPos] = isEndTag(str, pos);
+        pos = endTagPos;
+        if (endTagName !== tagName) {
+            throw new Error(`Expected end tag "${tagName}" but found "${endTagName}"`);
+        }
     }
 
     return [element, pos];
@@ -297,6 +303,7 @@ function eatTag(str, pos) {
 
 /**
  * Check if there is an HTML comment at a given position in a string.
+ *
  * @param {string} str - The string to check
  * @param {number} pos - The position to check
  * @returns {boolean} Whether there is an HTML comment at the given position
@@ -326,35 +333,13 @@ function eatComment(str, pos) {
 }
 
 /**
- * Get a tag name from a given position in a string.
- * Returns the tag name and the position after the word.
- * The given position is after the tag's opening "<" or "</".
- * The returned position is before the tag's closing ">".
- *
- * @param {string} str - The string to get the word from
- * @param {number} pos - The position to start getting the word from
- * @returns {[string, number]} The tag name and the position after it
- */
-function getTagName(str, pos) {
-    let tagName = "";
-
-    while (str[pos] !== " " && str[pos] !== "\n" && str[pos] !== "\t" && str[pos] !== ">" && pos < str.length) {
-        tagName += str[pos];
-        pos += 1;
-    }
-
-    return [tagName, pos];
-}
-
-/**
  * Check if there is a start HTML tag at a given position in a string.
  * It throws an error if the tag is not valid.
  * If true, return the tag name and the position after the tag name.
  *
  * @param {string} str - The string to check
  * @param {number} pos - The position to check
- *
- * @returns {[string, number]} Whether there is a start HTML tag at the given position
+ * @returns {[string, number]} Gets the tag name and the position after the tag name
  */
 function isStartTag(str, pos) {
     if (str[pos] !== "<" || str[pos + 1] === "/" || str[pos + 1] === "!" || str[pos + 1] === "?") {
@@ -378,38 +363,41 @@ function isStartTag(str, pos) {
  *
  * @param {string} str - The string to check
  * @param {number} pos - The position to check
- * @returns {boolean} Whether there is a closing HTML tag at the given position
+ * @returns {[string, number]} Returns the tag name and the position after the closing ">"
  */
 function isEndTag(str, pos) {
     if (str[pos] !== "<" || str[pos + 1] !== "/") {
-        return false;
+        return ["", pos];
     }
 
-    const [tagName, _newPos] = getTagName(str, pos + 2);
+    const [tagName, newPos] = getTagName(str, pos + 2);
     if (tagName === "" || !htmlTags.includes(tagName)) {
         throw new Error(`Invalid HTML tag${tagName}`);
     }
 
-    return true;
+    // Eat closing ">"
+    pos = newPos + 1;
+
+    return [tagName, pos];
 }
 
 /**
- * Eat a closing HTML tag at a given position in a string.
- * Returns the position after the closing HTML tag.
- * The given position is before the tag's opening "</".
+ * Get a tag name from a given position in a string.
+ * Returns the tag name and the position after the word.
+ * The given position is after the tag's opening "<" or "</".
+ * The returned position is before the tag's closing ">".
  *
- * @param {string} str - The string to eat from
- * @param {number} pos - The position to start eating from
- * @returns {number}     The position after the ">"
+ * @param {string} str - The string to get the word from
+ * @param {number} pos - The position to start getting the word from
+ * @returns {[string, number]} The tag name and the position after it
  */
-function eatEndTag(str, pos) {
-    // Eat opening "</"
-    pos += 2;
+function getTagName(str, pos) {
+    let tagName = "";
 
-    while (str[pos] !== ">") {
+    while (str[pos] !== " " && str[pos] !== "\n" && str[pos] !== "\t" && str[pos] !== ">" && pos < str.length) {
+        tagName += str[pos];
         pos += 1;
     }
 
-    // Eat closing ">"
-    return pos + 1;
+    return [tagName, pos];
 }
