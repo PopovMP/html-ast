@@ -59,10 +59,10 @@ export function parse(html) {
     // Eat DOCTYPE
     const [tagName, doctypePos] = getTagName(html, pos+1);
     if (tagName === "!DOCTYPE") {
-        pos = eatTag(html, doctypePos)
+        pos = eatTag(html, doctypePos);
     }
 
-    parseElements(html, pos, ast.children)
+    parseElements(html, pos, ast.children);
 
     return ast;
 }
@@ -91,7 +91,7 @@ function parseElements(str, pos, children) {
             continue;
         }
 
-        const [tagName] = isStartTag(str, pos)
+        const [tagName] = isStartTag(str, pos);
         if (tagName === "") {
             break;
         }
@@ -126,7 +126,6 @@ function parseElement(str, pos) {
 
     pos = parseAttributes(str, pos, element.attributes);
     pos = parseElements(str, pos, element.children);
-
     pos = eatWhiteSpace(str, pos);
 
     if (!voidHtmlTags.includes(tagName.toLowerCase())) {
@@ -230,7 +229,7 @@ function parseAttributeValue(str, pos) {
         while (str[pos] !== '"' && str[pos] !== ">") {
             if (pos > str.length) debugger;
             value += str[pos];
-            pos += 1;
+            pos   += 1;
         }
 
         // Eat closing quote
@@ -238,13 +237,12 @@ function parseAttributeValue(str, pos) {
     } else {
         while (str[pos] !== " " && str[pos] !== ">") {
             value += str[pos];
-            pos  += 1;
+            pos   += 1;
         }
     }
 
     return [value, pos];
 }
-
 
 /**
  * Parse a text node from a given position in a string.
@@ -254,7 +252,7 @@ function parseAttributeValue(str, pos) {
  * @param str - The string to parse from
  * @param pos - The position to start parsing from
  * @param children - The children array to push the text node to
- * @return {number}
+ * @returns {number}
  */
 function parseTextNode(str, pos, children) {
     let text = "";
@@ -264,7 +262,7 @@ function parseTextNode(str, pos, children) {
         pos  += 1;
     }
 
-    text = text.trim()
+    text = text.trim();
 
     // Create and push a text node if it is not all space or blank
     if (text !== "") {
@@ -290,6 +288,7 @@ function eatWhiteSpace(str, pos) {
     while (pos < str.length && spaces.includes(str[pos])) {
         pos += 1;
     }
+
     return pos;
 }
 
@@ -391,7 +390,7 @@ function isEndTag(str, pos) {
  * Get a tag name from a given position in a string.
  * Returns the tag name and the position after the word.
  * The given position is after the tag's opening "<" or "</".
- * The returned position is before the tag's closing ">".
+ * The returned position is before the tag's closing ">" or a whitespace.
  *
  * @param {string} str - The string to get the word from
  * @param {number} pos - The position to start getting the word from
@@ -420,6 +419,7 @@ export function getAttributeNames(elem) {
 
 /**
  * Get the attribute's value of an AST element.
+ *
  * @param {ASTElement} elem
  * @param {string} attrName
  */
@@ -454,7 +454,7 @@ export function getClassName(elem) {
  * @return {string[]} The class names array
  */
 export function getClassList(elem) {
-    return getClassName(elem).split(" ").filter(name => name !== "");
+    return getClassName(elem).split(" ").map((name) => name.trim()).filter((name) => name !== "");
 }
 
 /**
@@ -472,6 +472,7 @@ export function getElementById(elem, id) {
 
     if (Array.isArray(elem.children)) {
         for (let child of elem.children) {
+            /**  @type {ASTElement|null} */
             const found = getElementById(child, id);
             if (found) {
                 return found;
@@ -490,6 +491,7 @@ export function getElementById(elem, id) {
  * @return {ASTElement[]}
  */
 export function getElementsByTagName(elem, tagName) {
+    /**  @type {ASTElement[]} */
     let children = [];
 
     if (Array.isArray(elem.children)) {
@@ -506,8 +508,13 @@ export function getElementsByTagName(elem, tagName) {
 
 /**
  * Gets children elements of an AST element by a class name recursively.
+ *
+ * @param {ASTElement} elem
+ * @param {string} className
+ * @returns {ASTElement[]}
  */
 export function getElementsByClassName(elem, className) {
+    /**  @type {ASTElement[]} */
     let children = [];
 
     if (Array.isArray(elem.children)) {
