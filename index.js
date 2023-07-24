@@ -3,9 +3,10 @@
 /**
  * @typedef {Object} ASTElement
  *
- * @property {string} tagName
+ * @property {string}           tagName
  * @property {{string: string}} attributes
- * @property {ASTElement[]} children
+ * @property {ASTElement[]}     children
+ * @property {string}           text
  */
 
 /**
@@ -51,6 +52,7 @@ export function parse(html) {
         tagName   : "document",
         attributes: /** @type {{string: string}} */ {},
         children  : /** @type {ASTElement[]}     */ [],
+        text      : "",
     };
 
     pos = eatWhiteSpace(html, 0)
@@ -122,6 +124,7 @@ function parseElement(str, pos) {
         tagName,
         attributes: /** @type {{string: string}} */ {},
         children  : /** @type {ASTElement[]}     */ [],
+        text      : "",
     };
 
     pos = parseAttributes(str, pos, element.attributes);
@@ -267,8 +270,10 @@ function parseTextNode(str, pos, children) {
     // Create and push a text node if it is not all space or blank
     if (text !== "") {
         children.push({
-            tagName: "#text",
-            value  : text,
+            tagName   : "#text",
+            attributes: /** @type {{string: string}} */ {},
+            children  : /** @type {ASTElement[]}     */ [],
+            text,
         });
     }
 
@@ -471,7 +476,9 @@ export function getElementById(elem, id) {
     }
 
     if (Array.isArray(elem.children)) {
-        for (let child of elem.children) {
+        for (let /** @type{ASTElement} */ child of elem.children) {
+            if (child.tagName === "#text") continue;
+
             /**  @type {ASTElement|null} */
             const found = getElementById(child, id);
             if (found) {
@@ -495,7 +502,9 @@ export function getElementsByTagName(elem, tagName) {
     let children = [];
 
     if (Array.isArray(elem.children)) {
-        for (let child of elem.children) {
+        for (let /** @type{ASTElement} */ child of elem.children) {
+            if (child.tagName === "#text") continue;
+
             if (child.tagName === tagName) {
                 children.push(child);
             }
@@ -518,7 +527,9 @@ export function getElementsByClassName(elem, className) {
     let children = [];
 
     if (Array.isArray(elem.children)) {
-        for (let child of elem.children) {
+        for (let /** @type{ASTElement} */ child of elem.children) {
+            if (child.tagName === "#text") continue;
+
             if (getClassList(child).includes(className)) {
                 children.push(child);
             }
@@ -527,4 +538,29 @@ export function getElementsByClassName(elem, className) {
     }
 
     return children;
+}
+
+/**
+ * Gets the inner text of an element.
+ * If the element contains children, it returns the children text joined with a space.
+ *
+ * @param {ASTElement} elem
+ * @return {string}
+ */
+export function getText(elem) {
+    /**  @type {string[]} */
+    let texts = [];
+
+    if (Array.isArray(elem.children)) {
+        for (let /** @type{ASTElement} */ child of elem.children) {
+            if (child.tagName === "#text") {
+                texts.push(child.text);
+                continue;
+            }
+
+            texts = texts.concat(getText(child));
+        }
+    }
+
+    return texts.join(" ");
 }
