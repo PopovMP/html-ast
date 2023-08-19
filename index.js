@@ -1,9 +1,10 @@
 /**
  * @typedef {Object} ASTElement
  *
- * @property {string} tagName
+ * @property {string}           tagName
  * @property {{string: string}} attributes
- * @property {ASTElement[]} children
+ * @property {ASTElement[]}     children
+ * @property {string}           text
  */
 
 /**
@@ -49,6 +50,7 @@ export function parse(html) {
         tagName   : "document",
         attributes: /** @type {{string: string}} */ {},
         children  : /** @type {ASTElement[]}     */ [],
+        text      : "",
     };
 
     pos = eatWhiteSpace(html, 0)
@@ -57,10 +59,10 @@ export function parse(html) {
     // Eat DOCTYPE
     const [tagName, doctypePos] = getTagName(html, pos+1);
     if (tagName === "!DOCTYPE") {
-        pos = eatTag(html, doctypePos)
+        pos = eatTag(html, doctypePos);
     }
 
-    parseElements(html, pos, ast.children)
+    parseElements(html, pos, ast.children);
 
     return ast;
 }
@@ -89,7 +91,7 @@ function parseElements(str, pos, children) {
             continue;
         }
 
-        const [tagName] = isStartTag(str, pos)
+        const [tagName] = isStartTag(str, pos);
         if (tagName === "") {
             break;
         }
@@ -120,11 +122,11 @@ function parseElement(str, pos) {
         tagName,
         attributes: /** @type {{string: string}} */ {},
         children  : /** @type {ASTElement[]}     */ [],
+        text      : "",
     };
 
     pos = parseAttributes(str, pos, element.attributes);
     pos = parseElements(str, pos, element.children);
-
     pos = eatWhiteSpace(str, pos);
 
     if (!voidHtmlTags.includes(tagName.toLowerCase())) {
@@ -242,7 +244,6 @@ function parseAttributeValue(str, pos) {
     return [value, pos];
 }
 
-
 /**
  * Parse a text node from a given position in a string.
  * Pushes the text node to the children array.
@@ -251,7 +252,7 @@ function parseAttributeValue(str, pos) {
  * @param str - The string to parse from
  * @param pos - The position to start parsing from
  * @param children - The children array to push the text node to
- * @return {number}
+ * @returns {number}
  */
 function parseTextNode(str, pos, children) {
     let text = "";
@@ -261,13 +262,15 @@ function parseTextNode(str, pos, children) {
         pos  += 1;
     }
 
-    text = text.trim()
+    text = text.trim();
 
     // Create and push a text node if it is not all space or blank
     if (text !== "") {
         children.push({
-            tagName: "#text",
-            value  : text,
+            tagName   : "#text",
+            attributes: /** @type {{string: string}} */ {},
+            children  : /** @type {ASTElement[]}     */ [],
+            text,
         });
     }
 
@@ -390,7 +393,7 @@ function isEndTag(str, pos) {
  * Get a tag name from a given position in a string.
  * Returns the tag name and the position after the word.
  * The given position is after the tag's opening "<" or "</".
- * The returned position is before the tag's closing ">".
+ * The returned position is before the tag's closing ">" or a whitespace.
  *
  * @param {string} str - The string to get the word from
  * @param {number} pos - The position to start getting the word from
@@ -419,6 +422,7 @@ export function getAttributeNames(elem) {
 
 /**
  * Get the attribute's value of an AST element.
+ *
  * @param {ASTElement} elem
  * @param {string} attrName
  */
@@ -453,7 +457,7 @@ export function getClassName(elem) {
  * @return {string[]} The class names array
  */
 export function getClassList(elem) {
-    return getClassName(elem).split(" ").filter(name => name !== "");
+    return getClassName(elem).split(" ").map((name) => name.trim()).filter((name) => name !== "");
 }
 
 /**
@@ -470,7 +474,10 @@ export function getElementById(elem, id) {
     }
 
     if (Array.isArray(elem.children)) {
-        for (let child of elem.children) {
+        for (let /** @type{ASTElement} */ child of elem.children) {
+            if (child.tagName === "#text") continue;
+
+            /**  @type {ASTElement|null} */
             const found = getElementById(child, id);
             if (found) {
                 return found;
@@ -489,10 +496,13 @@ export function getElementById(elem, id) {
  * @return {ASTElement[]}
  */
 export function getElementsByTagName(elem, tagName) {
+    /**  @type {ASTElement[]} */
     let children = [];
 
     if (Array.isArray(elem.children)) {
-        for (let child of elem.children) {
+        for (let /** @type{ASTElement} */ child of elem.children) {
+            if (child.tagName === "#text") continue;
+
             if (child.tagName === tagName) {
                 children.push(child);
             }
@@ -505,12 +515,19 @@ export function getElementsByTagName(elem, tagName) {
 
 /**
  * Gets children elements of an AST element by a class name recursively.
+ *
+ * @param {ASTElement} elem
+ * @param {string} className
+ * @returns {ASTElement[]}
  */
 export function getElementsByClassName(elem, className) {
+    /**  @type {ASTElement[]} */
     let children = [];
 
     if (Array.isArray(elem.children)) {
-        for (let child of elem.children) {
+        for (let /** @type{ASTElement} */ child of elem.children) {
+            if (child.tagName === "#text") continue;
+
             if (getClassList(child).includes(className)) {
                 children.push(child);
             }
@@ -519,4 +536,29 @@ export function getElementsByClassName(elem, className) {
     }
 
     return children;
+}
+
+/**
+ * Gets the inner text of an element.
+ * If the element contains children, it returns the children text joined with a space.
+ *
+ * @param {ASTElement} elem
+ * @return {string}
+ */
+export function getText(elem) {
+    /**  @type {string[]} */
+    let texts = [];
+
+    if (Array.isArray(elem.children)) {
+        for (let /** @type{ASTElement} */ child of elem.children) {
+            if (child.tagName === "#text") {
+                texts.push(child.text);
+                continue;
+            }
+
+            texts = texts.concat(getText(child));
+        }
+    }
+
+    return texts.join(" ");
 }
