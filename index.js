@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * @typedef {Object} ASTElement
  *
@@ -146,7 +144,7 @@ function parseElement(str, pos) {
  *
  * @param {string} str - The string to parse from
  * @param {number} pos - The position to start parsing from
- * @param {{string: string}} attributes - The attributes object to add the parsed attributes to
+ * @param {{string: string}} attributes - The attribute object to add the parsed attributes to
  * @returns {number} The position after the start tag
  */
 function parseAttributes(str, pos, attributes) {
@@ -193,7 +191,7 @@ function parseAttribute(str, pos) {
 function parseAttributeName(str, pos) {
     let name = "";
 
-    // Attribute name finishes before "=" or ">" or " "
+    // Attribute name finishes before "=", or ">" or " " in case of a void attribute.
     while (str[pos] !== "=" && str[pos] !== ">" && str[pos] !== " ") {
         name += str[pos];
         pos  += 1;
@@ -227,10 +225,9 @@ function parseAttributeValue(str, pos) {
         // Eat opening quote
         pos += 1;
 
-        while (str[pos] !== '"' && str[pos] !== ">") {
-            if (pos > str.length) debugger;
+        while (str[pos] !== '"') {
             value += str[pos];
-            pos += 1;
+            pos   += 1;
         }
 
         // Eat closing quote
@@ -238,7 +235,7 @@ function parseAttributeValue(str, pos) {
     } else {
         while (str[pos] !== " " && str[pos] !== ">") {
             value += str[pos];
-            pos  += 1;
+            pos   += 1;
         }
     }
 
@@ -287,9 +284,11 @@ function parseTextNode(str, pos, children) {
  */
 function eatWhiteSpace(str, pos) {
     const spaces = [" ", "\r", "\n", "\t"];
+
     while (pos < str.length && spaces.includes(str[pos])) {
         pos += 1;
     }
+
     return pos;
 }
 
