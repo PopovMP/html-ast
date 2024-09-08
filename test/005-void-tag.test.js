@@ -34,4 +34,11 @@ describe("void tag", () => {
         const meta = ast.children[0].children[0].children[0];
         equal(meta.tagName, "meta");
     });
+
+    it("Parse a void tag ending with />", () => {
+        const html = `<body><img src="test.jpg" /></body>`;
+        const ast = parse(html);
+        const img = ast.children[0].children[0];
+        equal(img.tagName, "img");
+    });
 });
